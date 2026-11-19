@@ -158,4 +158,152 @@ expect(library.searchSongsByTitle(''), isEmpty);
     // No match
     expect(library.searchSongsByTitle('midnight california'), isEmpty);
   });
+
+  test('calculateTotalTimePlayed sums listenedDuration for a specific song', () {
+    final library = MusicLibrary();
+
+    library.addSong(
+      songId: 's1',
+      songTitle: 'Cruel Summer',
+      duration: const Duration(minutes: 2, seconds: 58),
+      filePath: null,
+    );
+    library.addSong(
+      songId: 's2',
+      songTitle: 'Levitating',
+      duration: const Duration(minutes: 3, seconds: 23),
+      filePath: null,
+    );
+
+
+    library.addPlaybackHistory(playbackHistoryId: 'h1', songId: 's1', listenedDuration: const Duration(minutes: 1, seconds: 30));
+    library.addPlaybackHistory(playbackHistoryId: 'h2', songId: 's1', listenedDuration: const Duration(minutes: 1, seconds: 30));
+    library.addPlaybackHistory(playbackHistoryId: 'h3', songId: 's2', listenedDuration: const Duration(minutes: 1, seconds: 30));
+      
+
+    expect(
+      library.calculateTotalTimePlayed('s1'),
+      const Duration(minutes: 3, seconds: 00),
+    );
+    expect(
+      () => library.calculateTotalTimePlayed('unknown'),throwsException );
+  });
+
+  test('sort songs ascending and descending', () {
+    final library = MusicLibrary();
+
+    library.addSong(
+      songId: 's1',
+      songTitle: 'Yellow',
+      duration: const Duration(minutes: 2, seconds: 58),
+      filePath: null,
+      dateAdded: DateTime(2026, 1, 1),
+    );
+    library.addSong(
+      songId: 's2',
+      songTitle: 'Attention',
+      duration: const Duration(minutes: 1, seconds: 20),
+      filePath: null,
+      dateAdded: DateTime(2026, 1, 3),
+    );
+    library.addSong(
+      songId: 's3',
+      songTitle: 'Perfect',
+      duration: const Duration(minutes: 2, seconds: 23),
+      filePath: null,
+      dateAdded: DateTime(2026, 1, 2),
+    );
+
+   
+    expect(
+      library.sortSongsByTitle(songList: library.songs, ascending: true).map((s) => s.title),
+      ['Attention', 'Perfect', 'Yellow'],
+    );
+    expect(
+      library.sortSongsByTitle(songList: library.songs, ascending: false).map((s) => s.title),
+      ['Yellow', 'Perfect', 'Attention'],
+    );
+
+    expect(
+      library.sortSongsByDuration(songList: library.songs, ascending: true).map((s) => s.id),
+      ['s2', 's3', 's1'],
+    );
+    expect(
+      library.sortSongsByDuration(songList: library.songs, ascending: false).map((s) => s.id),
+      ['s1', 's3', 's2'],
+    );
+
+    expect(
+      library.sortSongsByDateAdded(songList: library.songs, ascending: true).map((s) => s.id),
+      ['s1', 's3', 's2'],
+    );
+    expect(
+      library.sortSongsByDateAdded(songList: library.songs, ascending: false).map((s) => s.id),
+      ['s2', 's3', 's1'],
+    );
+  });
+
+  test('sortPlaylistsByTitle sorts ascending and descending', () {
+    final library = MusicLibrary();
+
+    library.addPlaylist(
+      playlistId: 'p1',
+      playlistName: 'Workout',
+      dateAdded: DateTime(2026, 1, 1),
+    );
+    library.addPlaylist(
+      playlistId: 'p2',
+      playlistName: 'chill',
+      dateAdded: DateTime(2026, 1, 3),
+    );
+    library.addPlaylist(
+      playlistId: 'p3',
+      playlistName: 'Party Mix',
+      dateAdded: DateTime(2026, 1, 2),
+    );
+
+    expect(
+      library.sortPlaylistsByTitle(songList: library.playlists, ascending: true).map((p) => p.name),
+      ['chill', 'Party Mix', 'Workout'],
+    );
+    expect(
+      library.sortPlaylistsByTitle(songList: library.playlists, ascending: false).map((p) => p.name),
+      ['Workout', 'Party Mix', 'chill'],
+    );
+
+    expect(library.playlists.map((p) => p.id), ['p1', 'p2', 'p3']);
+  });
+
+  test('sortPlaylistByDateAdded sorts ascending (oldest first) and descending (newest first)', () {
+    final library = MusicLibrary();
+
+    library.addPlaylist(
+      playlistId: 'p1',
+      playlistName: 'Workout',
+      dateAdded: DateTime(2026, 1, 1),
+    );
+    library.addPlaylist(
+      playlistId: 'p2',
+      playlistName: 'Chill',
+      dateAdded: DateTime(2026, 1, 3),
+    );
+    library.addPlaylist(
+      playlistId: 'p3',
+      playlistName: 'Party',
+      dateAdded: DateTime(2026, 1, 2),
+    );
+
+    expect(
+      library.sortPlaylistByDateAdded(songList: library.playlists, ascending: true).map((p) => p.id),
+      ['p1', 'p3', 'p2'],
+    );
+    expect(
+      library.sortPlaylistByDateAdded(songList: library.playlists, ascending: false).map((p) => p.id),
+      ['p2', 'p3', 'p1'],
+    );
+
+    expect(library.playlists.map((p) => p.id), ['p1', 'p2', 'p3']);
+  });
+
 }
+

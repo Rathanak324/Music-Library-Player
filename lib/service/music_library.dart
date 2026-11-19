@@ -10,18 +10,20 @@ class MusicLibrary {
   DateTime _currentHistoryMonth = DateTime.now(); // used in function resetPlaybackHistoryEveryMonth()
 
   // Adding songs
-  void addSong({required String songId, required String songTitle, required Duration duration, String? filePath}) {
+  void addSong({required String songId, required String songTitle, required Duration duration, String? filePath, DateTime? dateAdded}) {
     Song? song = _findSongOrNull(songId);
     if (song != null) {
       throw Exception('Song $song already exists');
     }
+
+    DateTime date = dateAdded ?? DateTime.now();
 
     songs.add(Song(
       id: songId,
       title: songTitle,
       filePath: filePath, // Assuming filePath is not provided here
       duration: duration,
-      dateAdded: DateTime.now(),
+      dateAdded: date,
     ));
   }
   // Removing songs
@@ -34,16 +36,18 @@ class MusicLibrary {
   }
 
   // Adding playlists
-  void addPlaylist({required String playlistId, required String playlistName}) {
+  void addPlaylist({required String playlistId, required String playlistName, DateTime? dateAdded}) {
     Playlist? playlist = _findPlaylistOrNull(playlistId);
     if (playlist != null) {
       throw Exception('Playlist $playlistId already exists');
     }
 
+    DateTime date = dateAdded ?? DateTime.now();
+
     playlists.add(Playlist(
       id: playlistId,
       name: playlistName,
-      dateCreated: DateTime.now()
+      dateCreated: date
     ));
   }
 
@@ -142,6 +146,28 @@ class MusicLibrary {
     return null;
   }
 
+  PlaybackHistory? _findPlaylbackHistoryOrNull(String playbackHistoryId) {
+      for (final playlist in playbackHistory) {
+        if (playlist.id == playbackHistoryId) {
+          return playlist;
+        }
+      }
+      return null;
+    }
+
+  // Create PlaybackHistory
+  void addPlaybackHistory({required String playbackHistoryId, required String songId, required Duration listenedDuration}) {
+    PlaybackHistory? playbackHis = _findPlaylbackHistoryOrNull(playbackHistoryId);
+    if (playbackHis != null) {
+      throw Exception('Song $playbackHis already exists');
+    }
+    Song? song = _findSongOrNull(songId);
+    if (song == null) {
+      throw Exception('Song $songId not found');
+    }
+
+    playbackHistory.add(PlaybackHistory(id: playbackHistoryId, song: song, listenedDuration: listenedDuration));
+  }
 
   // Resets PlaybackHistory if month changes
   void resetPlaybackHistoryEveryMonth() {
@@ -155,6 +181,10 @@ class MusicLibrary {
 
   // Calculate total played time of a song
   Duration calculateTotalTimePlayed(String songId) {
+    Song? song = _findSongOrNull(songId);
+    if (song == null) {
+      throw Exception('Song $songId not found');
+    }
     Duration total = Duration.zero; 
 
     for (final history in playbackHistory) {
@@ -188,14 +218,13 @@ class MusicLibrary {
 
   // Sort song by date added (asc/desc)
   List<Song> sortSongsByDateAdded({required List<Song> songList, bool ascending = true}) {
-    final sorted = [...(songList)];
+    final sorted = [...songList];
 
     sorted.sort((a, b) => ascending
-        ? b.dateAdded.compareTo(a.dateAdded)
-        : a.dateAdded.compareTo(b.dateAdded));
+        ? a.dateAdded.compareTo(b.dateAdded)   
+        : b.dateAdded.compareTo(a.dateAdded)); 
     return sorted;
   }
-
   // Sort playlists by title (asc/desc) 
   List<Playlist> sortPlaylistsByTitle({required List<Playlist> songList, bool ascending = true}) {
     final sorted = [...(songList)];
@@ -212,8 +241,10 @@ class MusicLibrary {
     final sorted = [...(songList)];
 
     sorted.sort((a, b) => ascending
-        ? b.dateCreated.compareTo(a.dateCreated)
-        : a.dateCreated.compareTo(b.dateCreated));
+        ? a.dateCreated.compareTo(b.dateCreated)
+        : b.dateCreated.compareTo(a.dateCreated));
     return sorted;
   }
+
+  
 }
