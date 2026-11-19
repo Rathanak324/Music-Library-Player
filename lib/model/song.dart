@@ -2,7 +2,7 @@
 class Song{
   String id;
   String title;
-  String filePath;
+  String? filePath;
   Duration duration;
   DateTime dateAdded;
 

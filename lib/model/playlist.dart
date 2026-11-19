@@ -6,7 +6,7 @@ class Playlist {
   String? description;
   String? imagePath;
   DateTime dateCreated;
-  List<Song>? songs;
+  List<Song>? songs= [];
 
   Playlist({
     required this.id,

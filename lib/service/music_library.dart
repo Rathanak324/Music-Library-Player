@@ -10,7 +10,7 @@ class MusicLibrary {
   DateTime _currentHistoryMonth = DateTime.now(); // used in function resetPlaybackHistoryEveryMonth()
 
   // Adding songs
-  void addSong({required String songId, required String songTitle, required String artist, required Duration duration}) {
+  void addSong({required String songId, required String songTitle, required Duration duration, String? filePath}) {
     Song? song = _findSongOrNull(songId);
     if (song != null) {
       throw Exception('Song $song already exists');
@@ -19,7 +19,7 @@ class MusicLibrary {
     songs.add(Song(
       id: songId,
       title: songTitle,
-      filePath: '', // Assuming filePath is not provided here
+      filePath: filePath, // Assuming filePath is not provided here
       duration: duration,
       dateAdded: DateTime.now(),
     ));
@@ -67,9 +67,12 @@ class MusicLibrary {
     if (playlist == null) {
       throw Exception('Playlist $playlistId not found');
     }
+    playlist.songs ??= [];
+
     if (playlist.songs!.contains(song)) {
       throw Exception('Song $songId already exists in playlist $playlistId');
     }
+    // Initialize the songs list if it's null
 
     playlist.songs!.add(song);
   }
@@ -120,6 +123,7 @@ class MusicLibrary {
     return songs.where((song) => words.every((word) => song.title.toLowerCase().contains(word))).toList();
   }
 
+  // Find a song by its ID, returning null if not found
   Song? _findSongOrNull(String songId) {
     for (final song in songs) {
       if (song.id == songId) {
