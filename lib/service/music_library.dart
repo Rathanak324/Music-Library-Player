@@ -7,6 +7,8 @@ class MusicLibrary {
   final List<Playlist> playlists = [];
   final List<PlaybackHistory> playbackHistory = [];
 
+  DateTime _currentHistoryMonth = DateTime.now(); // used in function resetPlaybackHistoryEveryMonth()
+
   // Adding songs
   void addSong({required String songId, required String songTitle, required String artist, required Duration duration}) {
     Song? song = _findSongOrNull(songId);
@@ -134,5 +136,80 @@ class MusicLibrary {
       }
     }
     return null;
+  }
+
+
+  // Resets PlaybackHistory if month changes
+  void resetPlaybackHistoryEveryMonth() {
+    final now = DateTime.now();
+
+    if (now.year != _currentHistoryMonth.year || now.month != _currentHistoryMonth.month) {
+      playbackHistory.clear();
+      _currentHistoryMonth = now;
+    }
+  }
+
+  // Calculate total played time of a song
+  Duration calculateTotalTimePlayed(String songId) {
+    Duration total = Duration.zero; 
+
+    for (final history in playbackHistory) {
+      if (history.song.id == songId) {
+        total = total + history.listenedDuration; 
+      }
+    }
+
+    return total;
+  }
+
+  // Sort songs by title (asc/desc) 
+  List<Song> sortSongsByTitle({required List<Song> songList, bool ascending = true}) {
+    final sorted = [...(songList)];
+
+    sorted.sort((a, b) => ascending
+        ? a.title.toLowerCase().compareTo(b.title.toLowerCase())
+        : b.title.toLowerCase().compareTo(a.title.toLowerCase()));
+    return sorted;
+  }
+
+  // Sort song by duration (asc/desc)
+  List<Song> sortSongsByDuration({required List<Song> songList, bool ascending = true}) {
+    final sorted = [...(songList)];
+
+    sorted.sort((a, b) => ascending
+        ? a.duration.compareTo(b.duration)
+        : b.duration.compareTo(a.duration));
+    return sorted;
+  }
+
+  // Sort song by date added (asc/desc)
+  List<Song> sortSongsByDateAdded({required List<Song> songList, bool ascending = true}) {
+    final sorted = [...(songList)];
+
+    sorted.sort((a, b) => ascending
+        ? b.dateAdded.compareTo(a.dateAdded)
+        : a.dateAdded.compareTo(b.dateAdded));
+    return sorted;
+  }
+
+  // Sort playlists by title (asc/desc) 
+  List<Playlist> sortPlaylistsByTitle({required List<Playlist> songList, bool ascending = true}) {
+    final sorted = [...(songList)];
+
+    sorted.sort((a, b) => ascending
+        ? a.name.toLowerCase().compareTo(b.name.toLowerCase())
+        : b.name.toLowerCase().compareTo(a.name.toLowerCase()));
+    return sorted;
+  }
+
+
+  // Sort playlists by date added (asc/desc)
+  List<Playlist> sortPlaylistByDateAdded({required List<Playlist> songList, bool ascending = true}) {
+    final sorted = [...(songList)];
+
+    sorted.sort((a, b) => ascending
+        ? b.dateCreated.compareTo(a.dateCreated)
+        : a.dateCreated.compareTo(b.dateCreated));
+    return sorted;
   }
 }
